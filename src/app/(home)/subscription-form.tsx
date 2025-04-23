@@ -6,6 +6,8 @@ import { Button } from "../components/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { postSubscriptions } from "@/http/api";
+import { useRouter } from "next/navigation";
 
 const subscriptionSchema = z.object({
     name: z.string().min(2, "Digite seu nome completo"),
@@ -15,6 +17,8 @@ const subscriptionSchema = z.object({
 type SubscriptionSchema = z.infer<typeof subscriptionSchema>;
 
 export function SubscriptionForm() {
+    const router = useRouter();
+
     const {
         register,
         handleSubmit,
@@ -23,8 +27,10 @@ export function SubscriptionForm() {
         resolver: zodResolver(subscriptionSchema),
     });
 
-    function onSubscribe(data: SubscriptionSchema) {
-        console.log(data);
+    async function onSubscribe({ name, email }: SubscriptionSchema) {
+        const { subscriberId } = await postSubscriptions({ name, email });
+
+        router.push(`/invite/${subscriberId}`);
     }
 
     return (
